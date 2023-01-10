@@ -5154,12 +5154,6 @@ public final class Settings {
         public static final String ANIMATOR_DURATION_SCALE = Global.ANIMATOR_DURATION_SCALE;
 
         /**
-         * Whether or not to vibrate when a touchscreen gesture is detected
-         * @hide
-         */
-        public static final String TOUCHSCREEN_GESTURE_HAPTIC_FEEDBACK = "touchscreen_gesture_haptic_feedback";
-
-        /**
          * Control whether the accelerometer will be used to change screen
          * orientation.  If 0, it will not be used unless explicitly requested
          * by the application; if 1, it will be used by default unless explicitly
@@ -5659,11 +5653,6 @@ public final class Settings {
         public static final String STATUS_BAR_BATTERY_TEXT_CHARGING = "status_bar_battery_text_charging";
 
         /**
-         * @hide
-         */
-        public static final String ENABLE_TASKBAR = "enable_taskbar";
-
-        /**
          * Whether to enable the ripple animation on fingerprint unlock
          * @hide
          */
@@ -5690,12 +5679,6 @@ public final class Settings {
          * @hide
          */
         public static final String FORCE_FULLSCREEN_CUTOUT_APPS = "force_full_screen_cutout_apps";
-
-        /**
-         * Whether to enable the pixel navbar animation
-         * @hide
-         */
-        public static final String PIXEL_NAV_ANIMATION = "pixel_nav_animation";
 
         /**
          * Keys we no longer back up under the current schema, but want to continue to
@@ -10874,13 +10857,6 @@ public final class Settings {
         public static final String TETHERING_ALLOW_VPN_UPSTREAMS = "tethering_allow_vpn_upstreams";
 
         /**
-         * Whether to skip biometric auth confirmation
-         * @hide
-         */
-        @Readable
-        public static final String IGNORE_AUTH_CONFIRMATION = "ignore_auth_confirmation";
-
-        /**
          * Controls whether the people strip is enabled.
          * @hide
          */
@@ -11286,12 +11262,6 @@ public final class Settings {
          */
         @Readable
         public static final String WINDOW_IGNORE_SECURE = "window_ignore_secure";
-
-        /**
-         * Face Unlock Method
-         * @hide
-         */
-        public static final String FACE_UNLOCK_METHOD = "face_unlock_method";
 
         /**
          * Whether to disable qs on secure lockscreen.

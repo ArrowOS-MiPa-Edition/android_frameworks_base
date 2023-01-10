@@ -50,14 +50,6 @@
          Use with extreme caution. -->
     <string-array name="config_appLockAllowedSystemApps" translatable="false" />
 
-    <!-- Array containing custom error messages from vendor. -->
-    <string-array name="face_error_vendor" translatable="false">
-        <item>@string/face_unlock_disabled_idle</item>
-    </string-array>
-
-    <!-- Enable face auth only when swiping security view -->
-    <bool name="config_faceAuthOnlyOnSecurityView">false</bool>
-
     <!-- Path to fast charging status file to detect whether an oem fast charger is active -->
     <string name="config_oemFastChargerStatusPath" translatable="false"></string>
 

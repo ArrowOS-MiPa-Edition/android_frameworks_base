@@ -29,7 +29,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.view.KeyEvent;
@@ -53,7 +52,6 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.FeatureFlags;
@@ -83,7 +81,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.unfold.FoldAodAnimationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
-import com.android.systemui.R;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -138,7 +135,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final BouncerViewDelegate mBouncerViewDelegate;
     private final Lazy<com.android.systemui.shade.ShadeController> mShadeController;
 
-    private boolean mBouncerVisible = false;
     private final BouncerExpansionCallback mExpansionCallback = new BouncerExpansionCallback() {
         private boolean mBouncerAnimating;
 
@@ -146,7 +142,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         public void onFullyShown() {
             mBouncerAnimating = false;
             updateStates();
-            showFaceRecognizingMessage();
         }
 
         @Override
@@ -179,7 +174,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
         @Override
         public void onVisibilityChanged(boolean isVisible) {
-            mBouncerVisible = isVisible;
             mCentralSurfaces
                     .setBouncerShowingOverDream(
                             isVisible && mDreamOverlayStateController.isOverlayActive());
@@ -258,10 +252,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private KeyguardBypassController mBypassController;
     @Nullable private AlternateAuthInterceptor mAlternateAuthInterceptor;
 
-    private Handler mHandler;
-    private Handler mFaceRecognizingHandler;
-    private boolean mFaceRecognitionRunning = false;
-
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
         @Override
@@ -271,28 +261,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             // the bouncer goes away.
             if (mOccluded) {
                 reset(true /* hideBouncerWhenShowing */);
-            }
-        }
-
-        @Override
-        public void onBiometricRunningStateChanged(boolean running,
-                BiometricSourceType biometricSourceType) {
-            if (biometricSourceType == BiometricSourceType.FACE &&
-                    mKeyguardUpdateManager.isUnlockWithFacePossible(mKeyguardUpdateManager.getCurrentUser())){
-                mFaceRecognitionRunning = running;
-                if (!mFaceRecognitionRunning){
-                    mFaceRecognizingHandler.removeCallbacksAndMessages(null);
-                }else{
-                    mFaceRecognizingHandler.postDelayed(() -> showFaceRecognizingMessage(), 100);
-                }
-            }
-        }
-
-        @Override
-        public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType,
-                boolean isStrongBiometric) {
-            if (biometricSourceType == BiometricSourceType.FACE) {
-                hideFaceRecognizingMessage();
             }
         }
     };
@@ -320,9 +288,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             FeatureFlags featureFlags,
             BouncerCallbackInteractor bouncerCallbackInteractor,
             BouncerInteractor bouncerInteractor,
-            BouncerView bouncerView,
-            @Main Handler handler,
-            @Main Handler faceRecognizingHandler) {
+            BouncerView bouncerView) {
         mContext = context;
         mViewMediatorCallback = callback;
         mLockPatternUtils = lockPatternUtils;
@@ -346,8 +312,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mFoldAodAnimationController = sysUIUnfoldComponent
                 .map(SysUIUnfoldComponent::getFoldAodAnimationController).orElse(null);
         mIsModernBouncerEnabled = featureFlags.isEnabled(Flags.MODERN_BOUNCER);
-        mHandler = handler;
-        mFaceRecognizingHandler = faceRecognizingHandler;
     }
 
     @Override
@@ -673,11 +637,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             }
         }
         updateStates();
-        mHandler.postDelayed(() -> {
-            if (mBouncerVisible) {
-                mKeyguardUpdateManager.updateFaceListeningStateForBehavior(mBouncerVisible);
-            }
-        }, 100);
     }
 
     private boolean isWakeAndUnlocking() {
@@ -1340,17 +1299,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             resetAlternateAuth(false);
             executeAfterKeyguardGoneAction();
         }
-    }
-
-    private void showFaceRecognizingMessage(){
-        if (mFaceRecognitionRunning &&
-                mKeyguardUpdateManager.isUnlockWithFacePossible(mKeyguardUpdateManager.getCurrentUser())) {
-            setKeyguardMessage(mContext.getString(R.string.face_unlock_recognizing), null);
-        }
-    }
-
-    private void hideFaceRecognizingMessage(){
-        setKeyguardMessage("", null);
     }
 
     /** Display security message to relevant KeyguardMessageArea. */

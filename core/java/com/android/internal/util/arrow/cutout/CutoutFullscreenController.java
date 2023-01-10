@@ -59,10 +59,7 @@ public class CutoutFullscreenController {
     }
 
     public boolean shouldForceCutoutFullscreen(String packageName) {
-        return isSupported() && (mApps.contains(packageName)
-        	|| packageName.contains("dialer")
-        	|| packageName.contains("android.settings")
-        	);
+        return isSupported() && mApps.contains(packageName);
     }
 
     public Set<String> getApps() {
